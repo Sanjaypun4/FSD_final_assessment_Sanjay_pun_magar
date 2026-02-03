@@ -1,20 +1,28 @@
  superadmin 
-User ID: Admin01
-Password: Admin@123
-
-x student service
-User ID: REG4958
-Password: G4SP35oyhm
-
-professor
-User ID: PRO2760
-Password: hQNBD@P2b9
+User ID: admin01
+Password: password
+( add,manage staff/students and also generated id pass )
 
 
-finance
-User ID: FIN6700
-Password: hb@Wo7XR86
+Register 
+User ID: REG6663
+Password: MXZTNP6nYj
+(Manage student records ,  Assist in course management)
+ 
+Finance
+User ID: FIN8219
+Password: tVjsiDCB94
+(Manage student fees
+Update payment status (paid/unpaid), Record paid amount, View fee reports)
+
 
 students
-User ID: STU7496
-Password: UqoWabLPcM
+User ID: STU2590
+Password: Bd8FEgLomj
+(View personal profile, Check attendance, View grades and results)
+
+
+professor
+User ID: PRO4763
+Password: Ux@YSAK3zk
+(View assigned students, Mark attendance,Enter and update grades,Add marks and results)
