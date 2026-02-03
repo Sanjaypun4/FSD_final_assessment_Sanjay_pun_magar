@@ -1,0 +1,20 @@
+ superadmin 
+User ID: Admin01
+Password: Admin@123
+
+x student service
+User ID: REG4958
+Password: G4SP35oyhm
+
+professor
+User ID: PRO2760
+Password: hQNBD@P2b9
+
+
+finance
+User ID: FIN6700
+Password: hb@Wo7XR86
+
+students
+User ID: STU7496
+Password: UqoWabLPcM

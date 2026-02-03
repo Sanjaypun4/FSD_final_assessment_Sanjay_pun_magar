@@ -1,0 +1,384 @@
+/* ================= RESET ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ================= BODY ================= */
+body {
+    background: #f4f6f9;
+    color: #333;
+}
+
+/* ================= TOP BAR ================= */
+.topbar {
+    height: 60px;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+}
+
+.topbar h2 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.topbar .user-info {
+    font-size: 14px;
+}
+
+/* ================= LAYOUT ================= */
+.wrapper {
+    display: flex;
+    min-height: calc(100vh - 60px);
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    width: 240px;
+    background: linear-gradient(to bottom, #6a11cb, #4b0dbf);
+    color: #fff;
+    padding-top: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin: 6px 10px;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-size: 15px;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.sidebar ul li.logout a {
+    background: #e74c3c;
+}
+
+.sidebar ul li.logout a:hover {
+    background: #c0392b;
+}
+
+/* ================= MAIN CONTENT ================= */
+.main-content {
+    flex: 1;
+    padding: 35px;
+}
+
+/* ================= COMMON HEADINGS ================= */
+h1, h2 {
+    color: #5b21b6;
+    margin-bottom: 20px;
+}
+
+/* ================= TABLES ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+table thead {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: #fff;
+}
+
+table th,
+table td {
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 14px;
+}
+
+table tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+table tbody tr:hover {
+    background: #f3efff;
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #6a11cb;
+    color: #fff;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+
+/* ================= FORMS ================= */
+form {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 500px;
+    margin: auto;
+}
+
+form label {
+    font-weight: 600;
+    display: block;
+    margin-top: 12px;
+}
+
+form input,
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* ================= FOOTER ================= */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #fff;
+    border-top: 1px solid #ddd;
+}
+
+
+
+.admin-dashboard-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.admin-dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 22px;
+}
+
+.admin-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 28px 18px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+}
+
+.admin-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.admin-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.admin-text {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.admin-logout {
+    background: #ffecec;
+    color: #b00020;
+}
+
+.admin-logout:hover {
+    background: #ffd6d6;
+}
+
+
+
+.prof-page-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.prof-info {
+    margin-bottom: 22px;
+    font-size: 15px;
+}
+
+.prof-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+}
+
+.prof-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 26px 18px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+}
+
+.prof-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.prof-icon {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.prof-text {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.registrar-page-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    color: #5b21b6;
+}
+
+.registrar-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+}
+
+.registrar-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 26px 18px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+}
+
+.registrar-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.registrar-icon {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.registrar-text {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+
+.finance-page-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    color: #5b21b6;
+}
+
+.finance-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 24px;
+}
+
+.finance-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 26px 18px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+}
+
+.finance-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.finance-icon {
+    font-size: 34px;
+    margin-bottom: 12px;
+}
+
+.finance-text {
+    font-size: 15px;
+    font-weight: 600;
+}
+/* ===== Student Dashboard (same style as others) ===== */
+
+.student-box {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    max-width: 700px;
+}
+
+.student-box h2 {
+    color: #6a11cb;
+    margin-bottom: 20px;
+}
+
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.student-table th,
+.student-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.student-table th {
+    background: #f3efff;
+    width: 35%;
+    font-weight: 600;
+}
+
+.student-table a {
+    color: #2575fc;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.student-table a:hover {
+    text-decoration: underline;
+}
