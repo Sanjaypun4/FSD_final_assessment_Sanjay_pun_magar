@@ -1,22 +1,34 @@
 <?php
-require_once "../includes/auth_check.php";
+require "../includes/auth_check.php";
 requireRole("super_admin");
 
-require_once "../config/db.php";
+require "../config/db.php";
+require "../includes/header.php";
 
 /* Check student ID */
 if (!isset($_GET["id"])) {
     die("Student ID missing");
 }
 
-$id = (int) $_GET["id"];
+$studentId = (int) $_GET["id"];
 
-/* Fetch student */
-$stmt = $conn->prepare(
-    "SELECT first_name, last_name, email, dob, course, address
-     FROM students WHERE id = ?"
-);
-$stmt->bind_param("i", $id);
+/* Fetch student + user */
+$stmt = $conn->prepare("
+    SELECT 
+        s.id AS student_id,
+        s.user_id AS user_pk,
+        u.user_id AS login_id,
+        s.first_name,
+        s.last_name,
+        s.email,
+        s.dob,
+        s.course,
+        s.address
+    FROM students s
+    JOIN users u ON u.id = s.user_id
+    WHERE s.id = ?
+");
+$stmt->bind_param("i", $studentId);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -29,11 +41,17 @@ $student = $result->fetch_assoc();
 /* Update */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $stmt = $conn->prepare(
-        "UPDATE students
-         SET first_name=?, last_name=?, email=?, dob=?, course=?, address=?
-         WHERE id=?"
-    );
+    $stmt = $conn->prepare("
+        UPDATE students
+        SET 
+            first_name = ?,
+            last_name  = ?,
+            email      = ?,
+            dob        = ?,
+            course     = ?,
+            address    = ?
+        WHERE id = ?
+    ");
     $stmt->bind_param(
         "ssssssi",
         $_POST["first_name"],
@@ -42,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_POST["dob"],
         $_POST["course"],
         $_POST["address"],
-        $id
+        $studentId
     );
     $stmt->execute();
 
@@ -51,22 +69,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Student</title>
-</head>
-<body>
-
 <h2>Edit Student</h2>
 
 <form method="post">
-    <input type="text" name="first_name" value="<?= htmlspecialchars($student['first_name']) ?>" required><br><br>
-    <input type="text" name="last_name" value="<?= htmlspecialchars($student['last_name']) ?>" required><br><br>
-    <input type="email" name="email" value="<?= htmlspecialchars($student['email']) ?>" required><br><br>
-    <input type="date" name="dob" value="<?= htmlspecialchars($student['dob']) ?>" required><br><br>
-    <input type="text" name="course" value="<?= htmlspecialchars($student['course']) ?>" required><br><br>
-    <input type="text" name="address" value="<?= htmlspecialchars($student['address']) ?>" required><br><br>
+
+    <p><strong>Login ID:</strong> <?= htmlspecialchars($student["login_id"]) ?></p>
+    <p style="color:gray;">(Login ID cannot be changed)</p><br>
+
+    <input type="text" name="first_name"
+           value="<?= htmlspecialchars($student["first_name"]) ?>" required><br><br>
+
+    <input type="text" name="last_name"
+           value="<?= htmlspecialchars($student["last_name"]) ?>" required><br><br>
+
+    <input type="email" name="email"
+           value="<?= htmlspecialchars($student["email"]) ?>" required><br><br>
+
+    <input type="date" name="dob"
+           value="<?= htmlspecialchars($student["dob"]) ?>" required><br><br>
+
+    <input type="text" name="course"
+           value="<?= htmlspecialchars($student["course"]) ?>" required><br><br>
+
+    <input type="text" name="address"
+           value="<?= htmlspecialchars($student["address"]) ?>" required><br><br>
 
     <button type="submit">Update Student</button>
 </form>
@@ -74,5 +100,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <br>
 <a href="manage_students.php">⬅ Back</a>
 
-</body>
-</html>
+<?php require "../includes/footer.php"; ?>

@@ -5,31 +5,28 @@ requireRole("student");
 require "../config/db.php";
 require "../includes/header.php";
 
-$userId = $_SESSION["user_id"];
+/* ✅ Logged-in student numeric ID (students.id) */
+$studentId = $_SESSION["student_id"] ?? null;
 
-/* ✅ STEP 1: Get student record using user_id */
+if (!$studentId) {
+    echo "<p style='color:red;'>❌ Student record not found.</p>";
+    require "../includes/footer.php";
+    exit;
+}
+
+/* ✅ Fetch student profile using students.id */
 $stmt = $conn->prepare("
-    SELECT 
-        s.id,
-        s.first_name,
-        s.last_name,
-        s.email,
-        s.course,
-        s.address,
-        s.dob,
-        u.user_id AS student_code
-    FROM students s
-    JOIN users u ON u.id = s.user_id
-    WHERE s.user_id = ?
+    SELECT id, first_name, last_name, email, course, address, dob
+    FROM students
+    WHERE id = ?
     LIMIT 1
 ");
-$stmt->bind_param("i", $userId);
+$stmt->bind_param("i", $studentId);
 $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
 
-/* ❌ No student record */
 if (!$student) {
-    echo "<p style='color:red;'>❌ Student profile not found.</p>";
+    echo "<p style='color:red;'>❌ Student record not found.</p>";
     require "../includes/footer.php";
     exit;
 }
@@ -40,7 +37,7 @@ if (!$student) {
 <table border="1" cellpadding="8">
 <tr>
     <th>Student ID</th>
-    <td><?= htmlspecialchars($student["student_code"]) ?></td>
+    <td><?= htmlspecialchars($student["id"]) ?></td>
 </tr>
 <tr>
     <th>Name</th>

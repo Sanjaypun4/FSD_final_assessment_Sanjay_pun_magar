@@ -1,23 +1,13 @@
 <?php
 require "../../includes/auth_check.php";
 requireRole("professor");
+
 require "../../config/db.php";
 require "../../includes/header.php";
 
-/* ✅ GET COURSE FROM DB (FIXED) */
-$stmt = $conn->prepare("
-    SELECT course_name
-    FROM courses
-    WHERE professor_id = ?
-    LIMIT 1
-");
-$stmt->bind_param("i", $_SESSION["staff_id"]);
-$stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
+$course = $_SESSION["course"] ?? "";
 
-$course = $row["course_name"] ?? "";
-
-if ($course === "") {
+if ($course === "" || $course === "Not Assigned") {
     echo "<h2>My Students</h2>";
     echo "<p>❌ No course assigned to you.</p>";
     echo '<a href="dashboard.php">⬅ Back to Dashboard</a>';
@@ -25,12 +15,16 @@ if ($course === "") {
     exit;
 }
 
-/* 1️⃣ FETCH STUDENTS */
 $stmt = $conn->prepare("
-    SELECT first_name, last_name, email
-    FROM students
-    WHERE course = ?
-    ORDER BY first_name
+    SELECT 
+        s.first_name,
+        s.last_name,
+        s.email,
+        u.user_id AS student_code
+    FROM students s
+    JOIN users u ON u.id = s.user_id
+    WHERE s.course = ?
+    ORDER BY s.first_name
 ");
 $stmt->bind_param("s", $course);
 $stmt->execute();
@@ -40,8 +34,9 @@ $result = $stmt->get_result();
 <h2>My Students</h2>
 <p>Course: <strong><?= htmlspecialchars($course) ?></strong></p>
 
-<table>
+<table border="1" cellpadding="8">
     <tr>
+        <th>Student ID</th>
         <th>Name</th>
         <th>Email</th>
     </tr>
@@ -49,13 +44,14 @@ $result = $stmt->get_result();
 <?php if ($result->num_rows > 0): ?>
     <?php while ($row = $result->fetch_assoc()): ?>
         <tr>
+            <td><?= htmlspecialchars($row["student_code"]) ?></td>
             <td><?= htmlspecialchars($row["first_name"] . " " . $row["last_name"]) ?></td>
             <td><?= htmlspecialchars($row["email"]) ?></td>
         </tr>
     <?php endwhile; ?>
 <?php else: ?>
     <tr>
-        <td colspan="2">No students found</td>
+        <td colspan="3">No students found</td>
     </tr>
 <?php endif; ?>
 </table>

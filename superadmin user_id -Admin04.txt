@@ -17,8 +17,8 @@ Update payment status (paid/unpaid), Record paid amount, View fee reports)
 
 
 students
-User ID: STU2590
-Password: Bd8FEgLomj
+User ID: STU1211
+Password: 7w3TPL@ypt
 (View personal profile, Check attendance, View grades and results)
 
 

@@ -1,6 +1,7 @@
 <?php
 require "../includes/auth_check.php";
 requireRole("super_admin");
+
 require "../config/db.php";
 require "../includes/header.php";
 
@@ -27,19 +28,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $role = $_POST["role"] ?? "";
 
     $first = trim($_POST["first_name"]);
-    $last = trim($_POST["last_name"]);
+    $last  = trim($_POST["last_name"]);
     $email = trim($_POST["email"]);
-    $dob = $_POST["dob"];
+    $dob   = $_POST["dob"];
     $address = trim($_POST["address"]);
 
     $course = trim($_POST["course"] ?? "");
     $department = trim($_POST["department"] ?? "");
 
     /* Generate credentials */
-    $login_user_id = generateUserId($role);
+    $login_user_id   = generateUserId($role);
     $plain_password = generatePassword();
     $hashed_password = password_hash($plain_password, PASSWORD_DEFAULT);
 
+    /* Ensure unique login ID */
     $check = $conn->prepare("SELECT id FROM users WHERE user_id = ?");
     $check->bind_param("s", $login_user_id);
     $check->execute();
@@ -58,8 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_param("sss", $login_user_id, $hashed_password, $role);
         $stmt->execute();
 
-        $newUserId = $conn->insert_id;
-
+        $userPk = $conn->insert_id; // 🔥 REAL IDENTITY
 
         if ($role === "student") {
 
@@ -74,43 +75,46 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             );
             $stmt2->bind_param(
                 "issssss",
-                $newUserId, $first, $last, $email, $dob, $course, $address
+                $userPk,
+                $first,
+                $last,
+                $email,
+                $dob,
+                $course,
+                $address
             );
             $stmt2->execute();
 
-        } else {
+        }
+        
+        else {
 
-            /* STAFF */
             if (empty($department)) {
                 throw new Exception("Department is required for staff.");
             }
 
+            if ($role === "professor" && empty($course)) {
+                throw new Exception("Course is required for professor.");
+            }
+
             $stmt2 = $conn->prepare(
                 "INSERT INTO staff
-                (user_id, first_name, last_name, email, dob, department, address, role_type)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                (user_id, first_name, last_name, email, dob, department, address, role_type, course)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             $stmt2->bind_param(
-                "isssssss",
-                $newUserId, $first, $last, $email, $dob, $department, $address, $role
+                "issssssss",
+                $userPk,
+                $first,
+                $last,
+                $email,
+                $dob,
+                $department,
+                $address,
+                $role,
+                $course
             );
             $stmt2->execute();
-
-            $staffId = $conn->insert_id;
-
-            if ($role === "professor") {
-
-                if (empty($course)) {
-                    throw new Exception("Course is required for professor.");
-                }
-
-                $stmt3 = $conn->prepare(
-                    "INSERT INTO courses (course_name, professor_id)
-                     VALUES (?, ?)"
-                );
-                $stmt3->bind_param("si", $course, $staffId);
-                $stmt3->execute();
-            }
         }
 
         $conn->commit();
@@ -122,7 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } catch (Exception $e) {
 
         $conn->rollback();
-        $message = " Error: " . $e->getMessage();
+        $message = "❌ Error: " . $e->getMessage();
     }
 }
 ?>
@@ -130,14 +134,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <h2>Register Student / Staff</h2>
 
 <?php if ($message): ?>
-    <p><?php echo htmlspecialchars($message); ?></p>
+    <p><?= htmlspecialchars($message) ?></p>
 <?php endif; ?>
 
 <?php if ($generated_id): ?>
     <h3>Generated Login Credentials</h3>
-    <p><strong>User ID:</strong> <?php echo htmlspecialchars($generated_id); ?></p>
-    <p><strong>Password:</strong> <?php echo htmlspecialchars($generated_password); ?></p>
-    <p style="color:red;"> Password is shown only once.</p>
+    <p><strong>User ID:</strong> <?= htmlspecialchars($generated_id) ?></p>
+    <p><strong>Password:</strong> <?= htmlspecialchars($generated_password) ?></p>
+    <p style="color:red;">⚠ Password is shown only once.</p>
 <?php endif; ?>
 
 <form method="post">

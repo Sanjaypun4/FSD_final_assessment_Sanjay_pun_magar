@@ -5,23 +5,31 @@ requireRole("student");
 require "../config/db.php";
 require "../includes/header.php";
 
-/* Logged-in student */
-$userId = $_SESSION["user_id"];
+/* ✅ Logged-in student numeric ID */
+$studentId = $_SESSION["student_id"] ?? null;
 
-/* Selected month (optional) */
+if (!$studentId) {
+    echo "<p style='color:red;'>❌ Student record not found.</p>";
+    require "../includes/footer.php";
+    exit;
+}
+
+/* ✅ Selected month (YYYY-MM) */
 $month = $_GET["month"] ?? date("Y-m");
 
-/* Fetch attendance */
+/* ✅ Convert month to date range */
+$startDate = $month . "-01";
+$endDate   = date("Y-m-t", strtotime($startDate));
+
+/* ✅ Fetch attendance using DATE RANGE (SAFE) */
 $stmt = $conn->prepare("
     SELECT date, status
     FROM attendance
-    WHERE student_id = (
-        SELECT id FROM students WHERE user_id = ?
-    )
-    AND DATE_FORMAT(date, '%Y-%m') = ?
+    WHERE student_id = ?
+    AND date BETWEEN ? AND ?
     ORDER BY date ASC
 ");
-$stmt->bind_param("is", $userId, $month);
+$stmt->bind_param("iss", $studentId, $startDate, $endDate);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -33,7 +41,7 @@ $data = [];
 while ($row = $result->fetch_assoc()) {
     $data[] = $row;
     $total++;
-    if ($row["status"] === "Present") {
+    if (strtolower($row["status"]) === "present") {
         $present++;
     }
 }
@@ -83,7 +91,7 @@ $percentage = $total > 0 ? round(($present / $total) * 100, 2) : 0;
 <?php if ($total > 0): ?>
     <?php foreach ($data as $row): ?>
         <tr>
-            <td><?= htmlspecialchars($row["date"]) ?></td>
+            <td><?= htmlspecialchars(date("Y-m-d", strtotime($row["date"]))) ?></td>
             <td><?= htmlspecialchars($row["status"]) ?></td>
         </tr>
     <?php endforeach; ?>

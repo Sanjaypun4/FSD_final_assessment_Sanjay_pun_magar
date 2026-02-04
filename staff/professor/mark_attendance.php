@@ -1,31 +1,22 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require "../../includes/auth_check.php";
 requireRole("professor");
 require "../../config/db.php";
 require "../../includes/header.php";
 
-/* 1️⃣ GET COURSE FROM DB (FIXED) */
-$stmt = $conn->prepare("
-    SELECT course_name
-    FROM courses
-    WHERE professor_id = ?
-    LIMIT 1
-");
-$stmt->bind_param("i", $_SESSION["staff_id"]);
-$stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
+$course = $_SESSION["course"] ?? "";
 
-$course = $row["course_name"] ?? "";
-
-if ($course === "") {
+if ($course === "" || $course === "Not Assigned") {
     echo "<h2>Mark Attendance</h2>";
-    echo "<p>❌ No course assigned.</p>";
+    echo "<p style='color:red;'>❌ No course assigned.</p>";
     echo '<a href="dashboard.php">⬅ Back</a>';
     require "../../includes/footer.php";
     exit;
 }
 
-/* 2️⃣ FETCH STUDENTS */
 $stmt = $conn->prepare("
     SELECT id, first_name, last_name
     FROM students
@@ -36,59 +27,75 @@ $stmt->bind_param("s", $course);
 $stmt->execute();
 $students = $stmt->get_result();
 
-/* 3️⃣ SAVE ATTENDANCE */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $studentId = (int)$_POST["student_id"];
-    $date      = $_POST["date"];
-    $status    = $_POST["status"];
+    $studentId = (int)($_POST["student_id"] ?? 0);
+    $date      = $_POST["date"] ?? "";
+    $status    = $_POST["status"] ?? "";
 
-    if (in_array($status, ["Present", "Absent"])) {
+    if ($studentId > 0 && $date !== "" && in_array($status, ["Present", "Absent"], true)) {
 
         $stmt = $conn->prepare("
-            INSERT INTO attendance (student_id, course, date, status)
+            INSERT INTO attendance (student_id, course, `date`, status)
             VALUES (?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE status = VALUES(status)
         ");
+
+        if (!$stmt) {
+            die("Attendance query error: " . $conn->error);
+        }
+
         $stmt->bind_param("isss", $studentId, $course, $date, $status);
         $stmt->execute();
 
-        echo "<p style='color:green;'>✅ Attendance saved</p>";
+        echo "<p style='color:green;'>✅ Attendance saved successfully</p>";
+    } else {
+        echo "<p style='color:red;'>❌ Invalid input</p>";
     }
 }
 ?>
 
 <h2>Mark Attendance</h2>
-<p><strong>Course:</strong> <?= htmlspecialchars($course) ?></p>
 
 <form method="post">
 
-    <select name="student_id" required>
-        <option value="">Select Student</option>
-        <?php while ($s = $students->fetch_assoc()): ?>
-            <option value="<?= $s["id"] ?>">
-                <?= htmlspecialchars($s["first_name"] . " " . $s["last_name"]) ?>
-            </option>
-        <?php endwhile; ?>
-    </select>
+    <label>
+        Student:
+        <select name="student_id" required>
+            <option value="">Select Student</option>
+            <?php while ($s = $students->fetch_assoc()): ?>
+                <option value="<?= $s['id'] ?>">
+                    <?= htmlspecialchars($s['first_name'] . " " . $s['last_name']) ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
+    </label>
 
     <br><br>
 
-    <input type="date" name="date" required>
+    <label>
+        Date:
+        <input type="date" name="date" required>
+    </label>
+
     <br><br>
 
-    <select name="status" required>
-        <option value="">Select</option>
-        <option value="Present">Present</option>
-        <option value="Absent">Absent</option>
-    </select>
+    <label>
+        Status:
+        <select name="status" required>
+            <option value="">Select</option>
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+        </select>
+    </label>
 
     <br><br>
 
     <button type="submit">Save Attendance</button>
+
 </form>
 
 <br>
-<a href="dashboard.php">⬅ Back</a>
+<a href="dashboard.php">⬅ Back to Dashboard</a>
 
 <?php require "../../includes/footer.php"; ?>

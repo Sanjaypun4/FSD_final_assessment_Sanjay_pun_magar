@@ -4,20 +4,10 @@ requireRole("professor");
 require "../../config/db.php";
 require "../../includes/header.php";
 
-/* ✅ GET COURSE FROM STAFF (SINGLE SOURCE OF TRUTH) */
-$stmt = $conn->prepare("
-    SELECT course 
-    FROM staff 
-    WHERE id = ?
-    LIMIT 1
-");
-$stmt->bind_param("i", $_SESSION["staff_id"]);
-$stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
+/* ✅ SINGLE SOURCE OF TRUTH */
+$course = $_SESSION["course"] ?? "";
 
-$course = $row["course"] ?? "";
-
-if ($course === "") {
+if ($course === "" || $course === "Not Assigned") {
     echo "<h2>Enter Grades</h2>";
     echo "<p>❌ No course assigned to you.</p>";
     echo '<a href="dashboard.php">⬅ Back</a>';
@@ -39,12 +29,12 @@ $students = $stmt->get_result();
 /* 2️⃣ SAVE / UPDATE GRADE */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $studentId = (int)$_POST["student_id"];
-    $marks     = (int)$_POST["marks"];
-    $resultVal = $_POST["result"];
+    $studentId = (int)($_POST["student_id"] ?? 0);
+    $marks     = (int)($_POST["marks"] ?? -1);
+    $resultVal = $_POST["result"] ?? "";
 
-    if ($marks < 0 || $marks > 100) {
-        echo "<p style='color:red;'>❌ Marks must be between 0–100</p>";
+    if ($studentId <= 0 || $marks < 0 || $marks > 100 || $resultVal === "") {
+        echo "<p style='color:red;'>❌ Invalid input</p>";
     } else {
 
         $stmt = $conn->prepare("

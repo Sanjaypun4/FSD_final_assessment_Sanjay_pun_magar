@@ -4,24 +4,12 @@ requireRole("professor");
 require "../../config/db.php";
 require "../../includes/header.php";
 
-/* Current month/year */
 $month = $_GET["month"] ?? date("m");
 $year  = $_GET["year"]  ?? date("Y");
 
-/* ✅ GET COURSE FROM DB (FIXED) */
-$stmt = $conn->prepare("
-    SELECT course_name
-    FROM courses
-    WHERE professor_id = ?
-    LIMIT 1
-");
-$stmt->bind_param("i", $_SESSION["staff_id"]);
-$stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
+$course = $_SESSION["course"] ?? "";
 
-$course = $row["course_name"] ?? "";
-
-if ($course === "") {
+if ($course === "" || $course === "Not Assigned") {
     echo "<h2>Attendance Sheet</h2>";
     echo "<p>❌ No course assigned.</p>";
     echo '<a href="dashboard.php">⬅ Back</a>';
@@ -29,7 +17,6 @@ if ($course === "") {
     exit;
 }
 
-/* 1️⃣ FETCH ATTENDANCE */
 $stmt = $conn->prepare("
     SELECT 
         CONCAT(s.first_name, ' ', s.last_name) AS student_name,
@@ -46,7 +33,6 @@ $stmt->bind_param("sii", $course, $month, $year);
 $stmt->execute();
 $result = $stmt->get_result();
 
-/* ORGANIZE DATA */
 $dates = [];
 $data  = [];
 

@@ -5,28 +5,16 @@ requireRole("student");
 require "../config/db.php";
 require "../includes/header.php";
 
-$userId = $_SESSION["user_id"];
+/* ✅ Use numeric student_id from session */
+$studentId = $_SESSION["student_id"] ?? null;
 
-/* ✅ STEP 1: Get student_id */
-$stmt = $conn->prepare("
-    SELECT id 
-    FROM students 
-    WHERE user_id = ?
-    LIMIT 1
-");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$studentRow = $stmt->get_result()->fetch_assoc();
-
-if (!$studentRow) {
+if (!$studentId) {
     echo "<p style='color:red;'>❌ Student record not found.</p>";
     require "../includes/footer.php";
     exit;
 }
 
-$studentId = $studentRow["id"];
-
-/* ✅ STEP 2: Fetch results */
+/* ✅ Fetch results */
 $stmt = $conn->prepare("
     SELECT course, marks, result
     FROM grades

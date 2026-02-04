@@ -5,43 +5,42 @@ requireRole("student");
 require "../config/db.php";
 require "../includes/header.php";
 
-$userId = $_SESSION["user_id"];
+/* ✅ Logged-in student numeric ID */
+$studentId = $_SESSION["student_id"] ?? null;
 
-/* ✅ STEP 1: Get student_id */
-$stmt = $conn->prepare("
-    SELECT id 
-    FROM students 
-    WHERE user_id = ?
-    LIMIT 1
-");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$studentRow = $stmt->get_result()->fetch_assoc();
-
-if (!$studentRow) {
+if (!$studentId) {
     echo "<p style='color:red;'>❌ Student record not found.</p>";
     require "../includes/footer.php";
     exit;
 }
 
-$studentId = (int)$studentRow["id"];
-
-/* ✅ STEP 2: Fetch fee record */
+/* ✅ Fetch LATEST fee record */
 $stmt = $conn->prepare("
     SELECT total_fee, paid_amount, status, updated_at
     FROM fees
     WHERE student_id = ?
+    ORDER BY updated_at DESC
     LIMIT 1
 ");
 $stmt->bind_param("i", $studentId);
 $stmt->execute();
-$fee = $stmt->get_result()->fetch_assoc();
+$result = $stmt->get_result();
+$fee = $result->fetch_assoc();
 
-/* ✅ Default values if no record */
-$totalFee   = $fee["total_fee"]   ?? 0;
-$paidAmount = $fee["paid_amount"] ?? 0;
-$status     = $fee["status"]      ?? "Not Assigned";
-$updatedAt  = $fee["updated_at"]  ?? "N/A";
+/* ✅ Safe defaults */
+$totalFee   = 0;
+$paidAmount = 0;
+$status     = "Not Assigned";
+$updatedAt  = "N/A";
+
+if ($fee) {
+    $totalFee   = (float)$fee["total_fee"];
+    $paidAmount = (float)$fee["paid_amount"];
+    $status     = $fee["status"] ?: "Assigned";
+    $updatedAt  = $fee["updated_at"]
+        ? date("Y-m-d", strtotime($fee["updated_at"]))
+        : "N/A";
+}
 
 $remaining = max(0, $totalFee - $paidAmount);
 ?>

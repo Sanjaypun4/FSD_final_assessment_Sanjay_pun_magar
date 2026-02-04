@@ -1,27 +1,23 @@
 <?php
+
 require "../../includes/auth_check.php";
 requireRole("professor");
 require "../../config/db.php";
 require "../../includes/header.php";
 
-/* Fetch assigned course */
-$stmt = $conn->prepare("
-    SELECT course_name
-    FROM courses
-    WHERE professor_id = ?
-    LIMIT 1
-");
-$stmt->bind_param("i", $_SESSION["staff_id"]);
-$stmt->execute();
-
-$course = $stmt->get_result()->fetch_assoc()["course_name"] ?? "Not Assigned";
+/* Get assigned course from session (single source of truth) */
+$course = $_SESSION["course"] ?? "Not Assigned";
 ?>
 
 <h2 class="page-title">Professor Dashboard</h2>
 
 <p class="info-text">
-    Assigned Course: <strong><?= htmlspecialchars($_SESSION["course"] ?: "Not Assigned") ?></strong>
+    Assigned Course: <strong><?= htmlspecialchars($course) ?></strong>
 </p>
+
+<?php if ($course === "Not Assigned" || $course === ""): ?>
+    <p class="error-text">❌ No course assigned to you.</p>
+<?php endif; ?>
 
 <div class="prof-dashboard">
 

@@ -1,46 +1,48 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require "../../includes/auth_check.php";
 requireRole("registrar");
 require "../../config/db.php";
 require "../../includes/header.php";
 
 $student = null;
-$grades = null;
+$grades  = null;
 $message = "";
 
 if (isset($_GET["student_user_id"])) {
 
     $student_user_id = trim($_GET["student_user_id"]);
 
-    // 🔹 Get student info
+    /* ✅ Fetch student */
     $stmt = $conn->prepare("
-        SELECT students.id, users.user_id, students.first_name, students.last_name, students.course
-        FROM students
-        JOIN users ON students.user_id = users.id
-        WHERE users.user_id = ?
+        SELECT 
+            s.id AS student_id,
+            u.user_id AS student_code,
+            s.first_name,
+            s.last_name,
+            s.course
+        FROM students s
+        JOIN users u ON u.id = s.user_id
+        WHERE u.user_id = ?
+        LIMIT 1
     ");
-
-    if (!$stmt) {
-        die("Student query error: " . $conn->error);
-    }
-
     $stmt->bind_param("s", $student_user_id);
     $stmt->execute();
     $student = $stmt->get_result()->fetch_assoc();
 
-    // 🔹 Get grades only if student exists
+    /* ✅ Fetch grades ONLY (safe) */
     if ($student) {
         $stmt2 = $conn->prepare("
-            SELECT course, grade, attendance
+            SELECT 
+                course,
+                marks,
+                result
             FROM grades
             WHERE student_id = ?
         ");
-
-        if (!$stmt2) {
-            die("Grades query error: " . $conn->error);
-        }
-
-        $stmt2->bind_param("i", $student["id"]);
+        $stmt2->bind_param("i", $student["student_id"]);
         $stmt2->execute();
         $grades = $stmt2->get_result();
     } else {
@@ -64,9 +66,9 @@ if (isset($_GET["student_user_id"])) {
 <?php if ($student): ?>
 
 <h3>Student Information</h3>
-<p><strong>User ID:</strong> <?php echo htmlspecialchars($student["user_id"]); ?></p>
-<p><strong>Name:</strong> <?php echo htmlspecialchars($student["first_name"] . " " . $student["last_name"]); ?></p>
-<p><strong>Program:</strong> <?php echo htmlspecialchars($student["course"]); ?></p>
+<p><strong>User ID:</strong> <?= htmlspecialchars($student["student_code"]) ?></p>
+<p><strong>Name:</strong> <?= htmlspecialchars($student["first_name"] . " " . $student["last_name"]) ?></p>
+<p><strong>Program:</strong> <?= htmlspecialchars($student["course"]) ?></p>
 
 <h3>Transcript</h3>
 
@@ -74,15 +76,15 @@ if (isset($_GET["student_user_id"])) {
 <table border="1" cellpadding="8">
 <tr>
     <th>Course</th>
-    <th>Grade</th>
-    <th>Attendance</th>
+    <th>Marks</th>
+    <th>Result</th>
 </tr>
 
 <?php while ($row = $grades->fetch_assoc()): ?>
 <tr>
-    <td><?php echo htmlspecialchars($row["course"]); ?></td>
-    <td><?php echo htmlspecialchars($row["grade"]); ?></td>
-    <td><?php echo htmlspecialchars($row["attendance"]); ?>%</td>
+    <td><?= htmlspecialchars($row["course"]) ?></td>
+    <td><?= htmlspecialchars($row["marks"]) ?></td>
+    <td><?= htmlspecialchars($row["result"]) ?></td>
 </tr>
 <?php endwhile; ?>
 </table>
@@ -91,7 +93,7 @@ if (isset($_GET["student_user_id"])) {
 <?php endif; ?>
 
 <?php elseif ($message): ?>
-<p style="color:red;"><?php echo $message; ?></p>
+<p style="color:red;"><?= htmlspecialchars($message) ?></p>
 <?php endif; ?>
 
 <br>
